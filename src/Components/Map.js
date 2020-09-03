@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMapGl, { NavigationControl, Marker } from 'react-map-gl';
+import { Badge } from '@material-ui/core';
 import { connect } from 'react-redux';
-
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 
@@ -19,6 +19,7 @@ class Map extends React.Component {
         }
     }
 
+    // on map click coordinates and calculated distance are sent to the state
     handleClick = (e) => {
         let coordinates = [e.lngLat[0], e.lngLat[1]];
         this.props.getCoordinates(coordinates)
@@ -37,6 +38,7 @@ class Map extends React.Component {
         return fullDistance;
     }
 
+    // calculate distance between 2 points using Haversine distance formula
     calcDistance = (mk1, mk2) => {
         const R = 6371.0710; // Radius of the Earth in kilometres
         const rlat1 = mk1[1] * (Math.PI / 180); // Convert degrees to radians
@@ -49,11 +51,13 @@ class Map extends React.Component {
 
     render() {
         // map the points array to display markers on the Vilnius map
+        let counter = 0;
         const markers = this.props.points.map(point =>
             <Marker
-                key={point}
+                key={counter}
                 latitude={point[1]} longitude={point[0]} offsetLeft={-20} offsetTop={-10}>
                 <img className="marker" src="marker.svg" alt="marker" />
+                <Badge badgeContent={counter++} color="secondary"></Badge>
             </Marker>
         );
 
@@ -75,6 +79,7 @@ class Map extends React.Component {
     }
 }
 
+// get state from redux
 const mapStateToProps = (state) => {
     return {
         points: state.points,
@@ -82,6 +87,7 @@ const mapStateToProps = (state) => {
     }
 }
 
+// pass component's events to redux
 const mapDispatchToProps = (dispatch) => {
     return {
         getCoordinates: (coordinates) => { dispatch({ type: 'GET_COORDINATES', coordinates: coordinates }) },

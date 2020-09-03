@@ -8,7 +8,7 @@ const rootReducer = (state = initState, action) => {
         case 'GET_COORDINATES':
             return {
                 ...state,
-                points: [...state.points, action.coordinates],
+                points: [...state.points, action.coordinates]
             }
         case 'GET_DISTANCE': {
             return {

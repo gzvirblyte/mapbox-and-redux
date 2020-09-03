@@ -9,17 +9,17 @@ import rootReducer from './reducers/rootReducer';
 
 const store = createStore(rootReducer);
 
-let initialValue = store.getState().distance;
-
-function handleStoreUpdates() {
-  let distance = store.getState().distance;
-  if (distance !== initialValue) {
-    console.log(`Distance: ${distance.toFixed(2)} km`)
+let currentValue;
+function handleChange() {
+  let previousValue = currentValue;
+  currentValue = store.getState().distance;
+  if (previousValue !== currentValue && currentValue > 0) {
+    console.log(`Total distance: ${currentValue.toFixed(2)} km`);
   }
 }
 
 store.subscribe(() => {
-  handleStoreUpdates(store);
+  handleChange();
 });
 
 
