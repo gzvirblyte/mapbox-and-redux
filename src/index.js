@@ -3,10 +3,31 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import rootReducer from './reducers/rootReducer';
+
+const store = createStore(rootReducer);
+
+let initialValue = store.getState().distance;
+
+function handleStoreUpdates() {
+  let distance = store.getState().distance;
+  if (distance !== initialValue) {
+    console.log(`Distance: ${distance.toFixed(2)} km`)
+  }
+}
+
+store.subscribe(() => {
+  handleStoreUpdates(store);
+});
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactMapGl, { NavigationControl, Marker } from 'react-map-gl';
+import { connect } from 'react-redux';
+
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 
@@ -13,30 +15,26 @@ class Map extends React.Component {
                 zoom: 12,
                 width: '100vw',
                 height: '100vh',
-            },
-            point: [[0, 0]],
-            distance: 0
+            }
         }
     }
 
     handleClick = (e) => {
-        this.setState({
-            point: [...this.state.point, [e.lngLat[0], e.lngLat[1]]]
-        })
+        let coordinates = [e.lngLat[0], e.lngLat[1]];
+        this.props.getCoordinates(coordinates)
         let distance = this.getFullDistance();
-        this.setState({ distance })
+        this.props.getDistance(distance)
     }
 
     getFullDistance = () => {
-        const points = this.state.point;
-        let distance = 0;
+        const points = this.props.points;
+        let fullDistance = 0;
         for (let i = 1; i < points.length; i++) {
             if (points[i + 1] !== undefined) {
-                distance += this.calcDistance(points[i], points[i + 1])
+                fullDistance += this.calcDistance(points[i], points[i + 1])
             }
         }
-        // console.log(`DISTANCE ${distance.toFixed(2)} KM`)
-        return distance;
+        return fullDistance;
     }
 
     calcDistance = (mk1, mk2) => {
@@ -50,7 +48,8 @@ class Map extends React.Component {
     }
 
     render() {
-        const markers = this.state.point.map(point =>
+        // map the points array to display markers on the Vilnius map
+        const markers = this.props.points.map(point =>
             <Marker
                 key={point}
                 latitude={point[1]} longitude={point[0]} offsetLeft={-20} offsetTop={-10}>
@@ -59,25 +58,35 @@ class Map extends React.Component {
         );
 
         return (
-            <div>
+            <div className="map">
                 <ReactMapGl
                     {...this.state.viewport}
                     mapboxApiAccessToken={MAPBOX_TOKEN}
                     mapStyle="mapbox://styles/gabijaz/ckejp02ko5y7019pt8snuj3lz"
                     onViewportChange={(viewport) => this.setState({ viewport })}
-                    onClick={this.handleClick}
-                >
+                    onClick={this.handleClick}>
                     {markers}
-
-
                     <div style={{ position: 'absolute', left: 10, top: 10 }}>
                         <NavigationControl />
                     </div>
-                    <button onClick={this.getFullDistance}>GET DISTANCE</button>
                 </ReactMapGl>
             </div>
         )
     }
 }
 
-export default Map;
+const mapStateToProps = (state) => {
+    return {
+        points: state.points,
+        distance: state.distance
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        getCoordinates: (coordinates) => { dispatch({ type: 'GET_COORDINATES', coordinates: coordinates }) },
+        getDistance: (distance) => { dispatch({ type: 'GET_DISTANCE', distance: distance }) }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Map);
